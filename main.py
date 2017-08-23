@@ -25,7 +25,7 @@ def main():
 	rospy.init_node('skeleton_tracker')
 	tfListener = tf.TransformListener()
 
-	# Thread for listening kinect users
+	# Thread for listening kinect user IDs
 	userListener = userListenerThread()
 	userListener.start()
 
@@ -203,11 +203,12 @@ def compute_angles(transforms, rotations):
 		elif angle_parallel < -0.75:
 			angle_parallel = -0.75
 
-		# Limit perpendicular angle
+		# Set perpendicular angle to zero if it's unexpectedly high or low - usually if elbows are farther from Kinect than shoulders
 		if angle_perpendicular > math.pi + math.pi / 4:
 			angle_perpendicular = 0
 		elif angle_perpendicular < -math.pi / 4:
 			angle_perpendicular = 0
+		# Limit perpendicular angle
 		elif angle_perpendicular > math.pi:
 			angle_perpendicular = math.pi
 		elif angle_perpendicular < 0:
