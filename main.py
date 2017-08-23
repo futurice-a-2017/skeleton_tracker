@@ -7,12 +7,14 @@ import threading
 import numpy as np
 import math
 import config
+import sys
 from pyrr import quaternion
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Header
 from userListenerThread import userListenerThread
 from collections import deque
 
+# Main program function
 def main():
 	### Initialize
 	# Rolling average filter
@@ -98,6 +100,7 @@ def main():
 
 		# Publish a transformation connecting kinect TF to robot TF eliminating separate TF trees
 		publishTF()
+
 
 # Compute needed angles, separate calculations for each type to match InMoov structure
 def compute_angles(transforms, rotations):
@@ -194,11 +197,17 @@ def compute_angles(transforms, rotations):
 			elif vector_shoulder_elbow[0] < 0 and i == 1:
 				angle_parallel = 0
 
-		# Limit angle
+		# Limit parallel angle
 		if angle_parallel > 0.75:
 			angle_parallel = 0.75
 		elif angle_parallel < -0.75:
 			angle_parallel = -0.75
+
+		# Limit perpendicular angle
+		if angle_perpendicular > math.pi + math.pi / 4:
+			angle_perpendicular = 0
+		elif angle_perpendicular < -math.pi / 4:
+			angle_perpendicular = 0
 		elif angle_perpendicular > math.pi:
 			angle_perpendicular = math.pi
 		elif angle_perpendicular < 0:
@@ -419,8 +428,5 @@ def filter_angles(angles, fifo_status):
 	config.angle_head = np.mean(config.angles_head)
 	config.angle_waist = np.mean(config.angles_waist)
 
-
-
 if __name__ == '__main__':
-
 	main()
